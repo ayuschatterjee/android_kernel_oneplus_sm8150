@@ -1,4 +1,4 @@
-name: Build kernel (KSN) & WIFI (New)
+name: Build kernel (SKS) & WIFI (New)
 on:
   workflow_dispatch:
     inputs:
