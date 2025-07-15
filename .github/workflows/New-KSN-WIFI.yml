@@ -84,7 +84,7 @@ jobs:
         echo "VERSION=$(expr $(git rev-list --count HEAD) + 10200)" >> $GITHUB_OUTPUT
         cd ..
     
-    - name: Build KernelSU-Next
+    - name: Build SukiSU-Ultra
       run: |
         export DTC_EXT=dtc
         export PATH=$(pwd)/aarch64/bin:/usr/lib/llvm-14/bin:$PATH
@@ -92,7 +92,9 @@ jobs:
         export LD=ld.lld
         cd kernel
         #curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next
-        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
+        #curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
+        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
+        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
         make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang-14"
         make $KERNEL_CMDLINE scripts CC="ccache clang-14"
         make $KERNEL_CMDLINE prepare CC="ccache clang-14"
