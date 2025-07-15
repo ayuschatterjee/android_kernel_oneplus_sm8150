@@ -91,7 +91,7 @@ jobs:
         export ARCH=arm64
         export LD=ld.lld
         cd kernel
-        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s main
+        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
         make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang-14"
         make $KERNEL_CMDLINE scripts CC="ccache clang-14"
         make $KERNEL_CMDLINE prepare CC="ccache clang-14"
