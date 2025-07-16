@@ -83,8 +83,9 @@ jobs:
         cd kernel
 
         # 3. Run SukiSU setup (this clones KernelSU folder into your kernel)
-        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
-
+        #curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
+        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
+        
         # 5. Disable all kprobe hooks (REQUIRED for NON-GKI)
         grep -RIl "#ifdef CONFIG_KPROBES" KernelSU/ | xargs sed -i 's/#ifdef CONFIG_KPROBES/#if defined(CONFIG_KPROBES) \&\& 0/'
 
