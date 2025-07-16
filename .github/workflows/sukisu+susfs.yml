@@ -183,7 +183,6 @@ jobs:
          ${{ env.OUTPUT_ZIP_NAME }}.zip
          ${{ env.OUTPUT_ZIP_NAME }}-modules.zip
       name: ${{ env.OUTPUT_ZIP_NAME }}-build-${{ github.run_number }}
-      tag_name: build-${{ github.run_number }}
       body: |
        Device: Oneplus 7/7Pro/7T/7TPro
        Includes:
