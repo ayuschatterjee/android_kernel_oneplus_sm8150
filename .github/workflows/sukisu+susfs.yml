@@ -84,27 +84,53 @@ jobs:
         export PATH=$(pwd)/aarch64/bin:/usr/lib/llvm-14/bin:$PATH
         export ARCH=arm64
         export LD=ld.lld
-        # Clone SUSFS patch repo
+
+        # 1. Clone SUSFS patch repo
         git clone --depth=1 --branch kernel-4.14 https://gitlab.com/simonpunk/susfs4ksu.git susfs4ksu
+
+        # 2. Enter kernel directory
         cd kernel
+
+        # 3. Run SukiSU setup (this clones KernelSU folder into your kernel)
         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s main
-        cd KernelSU && git revert 898e9d4f8ca9b2f46b0c6b36b80a872b5b88d899 || true
+
+        # 4. Revert non-GKI removal commit inside KernelSU
+        cd KernelSU
+        git revert 898e9d4f8ca9b2f46b0c6b36b80a872b5b88d899 || true
         cd ..
+
+        # 5. Disable all kprobe hooks (REQUIRED for NON-GKI)
         grep -RIl "#ifdef CONFIG_KPROBES" KernelSU/ | xargs sed -i 's/#ifdef CONFIG_KPROBES/#if defined(CONFIG_KPROBES) \&\& 0/'
+
+        # 6. Apply SUSFS patch (MUST come after KernelSU is cloned)
         cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch KernelSU/
-        cp ../susfs4ksu/kernel_patches/50_add_susfs_in_kernel-*.patch .
+        cp ../susfs4ksu/kernel_patches/50_add_susfs_in_kernel-4.14.patch .
         cp -r ../susfs4ksu/kernel_patches/fs/* fs/
         cp -r ../susfs4ksu/kernel_patches/include/linux/* include/linux/
-        cd KernelSU && patch -p1 < 10_enable_susfs_for_ksu.patch || true && cd ..
-        patch -p1 < 50_add_susfs_in_kernel-*.patch || true
-        sed -i "s/printf '%s' -dirty/printf '%s' ''/" scripts/setlocalversion
+
+        cd KernelSU
+        patch -p1 < 10_enable_susfs_for_ksu.patch || true
+        cd ..
+        patch -p1 < 50_add_susfs_in_kernel-4.14.patch || true
+
+        # 7. Remove '-dirty' from kernel release string
+        sed -i "s/printf '%s' -dirty/printf '%s' ''/g" scripts/setlocalversion
+
+        # 8. Ensure CONFIG_KSU and CONFIG_KSU_SUSFS are enabled in defconfig (OPTIONAL but recommended)
+        grep -q CONFIG_KSU=y arch/arm64/configs/${KERNEL_DEFCONFIG} || echo "CONFIG_KSU=y" >> arch/arm64/configs/${KERNEL_DEFCONFIG}
+        grep -q CONFIG_KSU_SUSFS=y arch/arm64/configs/${KERNEL_DEFCONFIG} || echo "CONFIG_KSU_SUSFS=y" >> arch/arm64/configs/${KERNEL_DEFCONFIG}
+        grep -q CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y arch/arm64/configs/${KERNEL_DEFCONFIG} || echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> arch/arm64/configs/${KERNEL_DEFCONFIG}
+
+        # 9. Build kernel
         make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang-14"
         make $KERNEL_CMDLINE scripts CC="ccache clang-14"
         make $KERNEL_CMDLINE prepare CC="ccache clang-14"
         make $KERNEL_CMDLINE CC="ccache clang-14" LD="ld.lld" -j$(nproc --all)
+
+        # 10. Copy final kernel Image
         cp out/arch/arm64/boot/Image ../AnyKernel3
         cd ..
-        ls -la AnyKernel3/  # Verify kernel image
+        ls -la AnyKernel3/
         
     - name: Build Wi-Fi Module (qca_cld3)
       run: |
