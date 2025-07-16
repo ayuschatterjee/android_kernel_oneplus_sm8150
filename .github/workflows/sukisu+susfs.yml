@@ -1,4 +1,4 @@
-name: Build kernel (SKS) & WIFI (New)
+name: Build Kernel (SukiSu) with Wifi
 on:
   workflow_dispatch:
     inputs:
