@@ -18,12 +18,6 @@ on:
         description: 'Name of the output.zip'
         required: false
         default: 'OnePlus7Pro_SukiSu_Anykernel3'
-  push:
-    branches:
-      - oneplus/OOS_SM8150_11.0
-  pull_request:
-    branches:
-      - oneplus/OOS_SM8150_11.0
 
 jobs:
   build:
@@ -84,14 +78,26 @@ jobs:
         echo "VERSION=$(expr $(git rev-list --count HEAD) + 10200)" >> $GITHUB_OUTPUT
         cd ..
     
-    - name: Build SukiSU-Ultra
+    - name: Build SukiSU-Ultra with SUSFS
       run: |
         export DTC_EXT=dtc
         export PATH=$(pwd)/aarch64/bin:/usr/lib/llvm-14/bin:$PATH
         export ARCH=arm64
         export LD=ld.lld
+        # Clone SUSFS patch repo
+        git clone --depth=1 --branch kernel-4.14 https://gitlab.com/simonpunk/susfs4ksu.git susfs4ksu
         cd kernel
-        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
+        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s main
+        cd KernelSU && git revert 898e9d4f8ca9b2f46b0c6b36b80a872b5b88d899 || true
+        cd ..
+        grep -RIl "#ifdef CONFIG_KPROBES" KernelSU/ | xargs sed -i 's/#ifdef CONFIG_KPROBES/#if defined(CONFIG_KPROBES) \&\& 0/'
+        cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch KernelSU/
+        cp ../susfs4ksu/kernel_patches/50_add_susfs_in_kernel-*.patch .
+        cp -r ../susfs4ksu/kernel_patches/fs/* fs/
+        cp -r ../susfs4ksu/kernel_patches/include/linux/* include/linux/
+        cd KernelSU && patch -p1 < 10_enable_susfs_for_ksu.patch || true && cd ..
+        patch -p1 < 50_add_susfs_in_kernel-*.patch || true
+        sed -i "s/printf '%s' -dirty/printf '%s' ''/" scripts/setlocalversion
         make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang-14"
         make $KERNEL_CMDLINE scripts CC="ccache clang-14"
         make $KERNEL_CMDLINE prepare CC="ccache clang-14"
@@ -99,7 +105,7 @@ jobs:
         cp out/arch/arm64/boot/Image ../AnyKernel3
         cd ..
         ls -la AnyKernel3/  # Verify kernel image
-
+        
     - name: Build Wi-Fi Module (qca_cld3)
       run: |
         export PATH=$(pwd)/aarch64/bin:/usr/lib/llvm-14/bin:$PATH
