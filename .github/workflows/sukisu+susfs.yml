@@ -68,16 +68,7 @@ jobs:
         sudo rm -rf "/usr/local/share/boost"
         sudo rm -rf /usr/share/dotnet
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-    
-    - name: Get Version
-      id: get_version
-      run: |
-        cd kernel
-        git fetch --unshallow
-        git rev-list --count HEAD
-        echo "VERSION=$(expr $(git rev-list --count HEAD) + 10200)" >> $GITHUB_OUTPUT
-        cd ..
-    
+      
     - name: Build SukiSU-Ultra with SUSFS
       run: |
         export DTC_EXT=dtc
@@ -194,14 +185,14 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          ${{ env.OUTPUT_ZIP_NAME }}.zip
-          ${{ env.OUTPUT_ZIP_NAME }}-modules.zip
-        name: ${{ env.OUTPUT_ZIP_NAME }}-${{ steps.get_version.outputs.VERSION }}
-        tag_name: ${{ steps.get_version.outputs.VERSION }}
-        body: |
-          Device: Oneplus 7/Oneplus 7Pro/Oneplus 7T/Oneplus 7TPro
-          Includes:
-          - Kernel Image
-          - qca_cld3 Wi-Fi Module (vermagic matched)
+         ${{ env.OUTPUT_ZIP_NAME }}.zip
+         ${{ env.OUTPUT_ZIP_NAME }}-modules.zip
+      name: ${{ env.OUTPUT_ZIP_NAME }}-build-${{ github.run_number }}
+      tag_name: build-${{ github.run_number }}
+      body: |
+       Device: Oneplus 7/7Pro/7T/7TPro
+       Includes:
+       - Kernel Image
+       - qca_cld3 Wi-Fi Module (vermagic matched)
       env:
         GITHUB_TOKEN: ${{ secrets.GH_PAT }}
