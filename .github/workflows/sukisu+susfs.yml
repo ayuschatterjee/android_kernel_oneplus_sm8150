@@ -85,11 +85,6 @@ jobs:
         # 3. Run SukiSU setup (this clones KernelSU folder into your kernel)
         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s main
 
-        # 4. Revert non-GKI removal commit inside KernelSU
-        cd KernelSU
-        git revert 898e9d4f8ca9b2f46b0c6b36b80a872b5b88d899 || true
-        cd ..
-
         # 5. Disable all kprobe hooks (REQUIRED for NON-GKI)
         grep -RIl "#ifdef CONFIG_KPROBES" KernelSU/ | xargs sed -i 's/#ifdef CONFIG_KPROBES/#if defined(CONFIG_KPROBES) \&\& 0/'
 
