@@ -1,14 +1,15 @@
 name: Build kernel 
 on:
   workflow_dispatch:
+   inputs:
     codename:
         required: true
         type: string
-        value: 'lineage_sm8150'
+        default: 'lineage_sm8150'
     repo:
         required: true
         type: string
-        value: 'android_kernel_oneplus_sm8150'
+        default: 'android_kernel_oneplus_sm8150'
   push:
     branches:
       - main
@@ -17,7 +18,7 @@ on:
       - main
   
 jobs:
-  build-kernel-sultan-kernelsu-susfs:
+  build-kernelsu-susfs:
     runs-on: ubuntu-latest
     steps:
       - name: Maximize Build Space
