@@ -154,7 +154,7 @@ jobs:
           export LD=ld.lld
           echo "Building the kernel..."
           
-          make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang-14"
+          make $KERNEL_CMDLINE "$codename"_defconfig CC="ccache clang-14"
           make $KERNEL_CMDLINE scripts CC="ccache clang-14"
           make $KERNEL_CMDLINE prepare CC="ccache clang-14"
           make $KERNEL_CMDLINE CC="ccache clang-14" LD="ld.lld" -j$(nproc --all)
