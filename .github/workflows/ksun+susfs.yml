@@ -27,7 +27,7 @@ jobs:
       - name: Installing dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi clang-14 llvm-14 lld-14 binutils-aarch64-linux-gnu binutils make python3 libssl-dev build-essential bc bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs     
+          sudo apt install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi clang-14 llvm-14 lld-14 binutils-aarch64-linux-gnu binutils make python3 libssl-dev build-essential bc bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs curl   
           sudo rm -rf /opt/ghc
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf /usr/share/dotnet
