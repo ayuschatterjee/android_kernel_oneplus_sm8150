@@ -4,9 +4,11 @@ on:
     codename:
         required: true
         type: string
+        value: 'lineage_sm8150'
     repo:
         required: true
         type: string
+        value: 'android_kernel_oneplus_sm8150'
   push:
     branches:
       - master
@@ -81,7 +83,7 @@ jobs:
           echo "Applying SUSFS patches..."
           
           # Copy SUSFS patches
-          cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch ./
+          cp ../susfs4ksu/kernel_patches/50_add_susfs_in_kernel-4.14.patch ./
           cp ../susfs4ksu/kernel_patches/fs/* ./fs/
           cp ../susfs4ksu/kernel_patches/include/linux/* ./include/linux/
 
