@@ -1,4 +1,4 @@
-name: Build Kernel (SukiSu) with Wifi
+name: Build kernel (KSN) & WIFI (New)
 on:
   workflow_dispatch:
     inputs:
@@ -17,7 +17,13 @@ on:
       output_name:
         description: 'Name of the output.zip'
         required: false
-        default: 'OnePlus7Pro_SukiSu_Anykernel3'
+        default: 'OP7_KSN_wifi'
+  push:
+    branches:
+      - oneplus/OOS_SM8150_11.0
+  pull_request:
+    branches:
+      - oneplus/OOS_SM8150_11.0
 
 jobs:
   build:
@@ -31,7 +37,7 @@ jobs:
       KERNEL_CMDLINE: "ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-androidkernel- CROSS_COMPILE_ARM32=arm-linux-gnueabi- LLVM=1 LLVM_IAS=1 O=out"
       KERNEL_SOURCE_URL: ${{ github.event.inputs.kernel_source_url || 'https://github.com/LineageOS/android_kernel_oneplus_sm8150' }}
       KERNEL_BRANCH: ${{ github.event.inputs.kernel_branch || 'lineage-22.1' }}
-      OUTPUT_ZIP_NAME: ${{ github.event.inputs.output_name || 'OnePlus7Pro_SukiSu_Anykernel3' }}
+      OUTPUT_ZIP_NAME: ${{ github.event.inputs.output_name || 'OP7_KSN_wifi' }}
 
     steps:
     - name: Checkout Kernel Source
@@ -68,57 +74,33 @@ jobs:
         sudo rm -rf "/usr/local/share/boost"
         sudo rm -rf /usr/share/dotnet
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-      
-    - name: Build SukiSU-Ultra with SUSFS
+    
+    - name: Get Version
+      id: get_version
+      run: |
+        cd kernel
+        git fetch --unshallow
+        git rev-list --count HEAD
+        echo "VERSION=$(expr $(git rev-list --count HEAD) + 10200)" >> $GITHUB_OUTPUT
+        cd ..
+    
+    - name: Build KernelSU-Next
       run: |
         export DTC_EXT=dtc
         export PATH=$(pwd)/aarch64/bin:/usr/lib/llvm-14/bin:$PATH
         export ARCH=arm64
         export LD=ld.lld
-
-        # 1. Clone SUSFS patch repo
-        git clone --depth=1 --branch kernel-4.14 https://gitlab.com/simonpunk/susfs4ksu.git susfs4ksu
-
-        # 2. Enter kernel directory
         cd kernel
-
-        # 3. Run SukiSU setup (this clones KernelSU folder into your kernel)
-        #curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
-        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
-        
-        # 5. Disable all kprobe hooks (REQUIRED for NON-GKI)
-        grep -RIl "#ifdef CONFIG_KPROBES" KernelSU/ | xargs sed -i 's/#ifdef CONFIG_KPROBES/#if defined(CONFIG_KPROBES) \&\& 0/'
-
-        # 6. Apply SUSFS patch (MUST come after KernelSU is cloned)
-        cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch KernelSU/
-        cp ../susfs4ksu/kernel_patches/50_add_susfs_in_kernel-4.14.patch .
-        cp -r ../susfs4ksu/kernel_patches/fs/* fs/
-        cp -r ../susfs4ksu/kernel_patches/include/linux/* include/linux/
-
-        cd KernelSU
-        patch -p1 < 10_enable_susfs_for_ksu.patch || true
-        cd ..
-        patch -p1 < 50_add_susfs_in_kernel-4.14.patch || true
-
-        # 7. Remove '-dirty' from kernel release string
-        sed -i "s/printf '%s' -dirty/printf '%s' ''/g" scripts/setlocalversion
-
-        # 8. Ensure CONFIG_KSU and CONFIG_KSU_SUSFS are enabled in defconfig (OPTIONAL but recommended)
-        grep -q CONFIG_KSU=y arch/arm64/configs/${KERNEL_DEFCONFIG} || echo "CONFIG_KSU=y" >> arch/arm64/configs/${KERNEL_DEFCONFIG}
-        grep -q CONFIG_KSU_SUSFS=y arch/arm64/configs/${KERNEL_DEFCONFIG} || echo "CONFIG_KSU_SUSFS=y" >> arch/arm64/configs/${KERNEL_DEFCONFIG}
-        grep -q CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y arch/arm64/configs/${KERNEL_DEFCONFIG} || echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> arch/arm64/configs/${KERNEL_DEFCONFIG}
-
-        # 9. Build kernel
+        #curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next
+        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
         make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang-14"
         make $KERNEL_CMDLINE scripts CC="ccache clang-14"
         make $KERNEL_CMDLINE prepare CC="ccache clang-14"
         make $KERNEL_CMDLINE CC="ccache clang-14" LD="ld.lld" -j$(nproc --all)
-
-        # 10. Copy final kernel Image
         cp out/arch/arm64/boot/Image ../AnyKernel3
         cd ..
-        ls -la AnyKernel3/
-        
+        ls -la AnyKernel3/  # Verify kernel image
+
     - name: Build Wi-Fi Module (qca_cld3)
       run: |
         export PATH=$(pwd)/aarch64/bin:/usr/lib/llvm-14/bin:$PATH
@@ -184,6 +166,7 @@ jobs:
           ${{ env.OUTPUT_ZIP_NAME }}.zip
           ${{ env.OUTPUT_ZIP_NAME }}-modules.zip
         name: ${{ env.OUTPUT_ZIP_NAME }}-${{ steps.get_version.outputs.VERSION }}
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
         body: |
           Device: Oneplus 7/Oneplus 7Pro/Oneplus 7T/Oneplus 7TPro
           Includes:
