@@ -84,9 +84,24 @@ jobs:
           #patch -p1 --forward --fuzz=7 < 10_enable_susfs_for_ksu.patch || echo "Patch failed !"       
           
           echo "Applying next SUSFS Fix patches..."
-          #cp ../../kernel_patches/next/susfs_fix_patches/v1.5.9/fix_apk_sign.c.patch ./
-          #patch -p1 --forward --fuzz=7 < fix_apk_sign.c.patch
-              
+          
+          PATCH_FILE=../../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch
+
+          # Apply the patch and check if it fails
+          if ! patch -p1 --forward --fuzz=7 < "$PATCH_FILE"; then
+            echo "❌ Patch failed: $PATCH_FILE"
+    
+            echo -e "\n🔍 Dumping failed hunk lines (.rej files):\n"
+
+            # Only show .rej files modified within the last 1 minute (likely from this patch)
+            find . -name "*.rej" -type f -mmin -1 | while read -r rejfile; do
+             echo "---- 🔥 $rejfile ----"
+             cat "$rejfile"
+             echo "---------------------------"
+            done
+          else
+            echo "✅ Patch applied: $PATCH_FILE"
+
           cp ../../kernel_patches/next/susfs_fix_patches/v1.5.9/fix_core_hook.c.patch ./
           patch -p1 --forward --fuzz=7 < fix_core_hook.c.patch
           
@@ -104,7 +119,10 @@ jobs:
           
           # Change to common directory and apply SUSFS patch
           cd ..
-          patch -p1 --forward --fuzz=7 < 50_add_susfs_in_kernel-4.14.patch || echo "Patch failed !"                   
+          patch -p1 --forward --fuzz=7 < 50_add_susfs_in_kernel-4.14.patch || echo "Patch failed !"                
+
+          cp ../kernel_patches/sultan/sys.c_fix.patch ./
+          patch -p1 --fuzz=7 < sys.c_fix.patch
 
       - name: Apply KSU Hooks
         run: |
