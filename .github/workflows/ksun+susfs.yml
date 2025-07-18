@@ -20,16 +20,10 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y gcc-aarch64-linux-gnu
-
-      - name: Set CONFIG Environment Variable
-        run: |
-          CONFIG="${{ inputs.repo }}" || 'android_kernel_oneplus_sm8150'
-          
+          CONFIG="${{ inputs.repo }}"
           # Set CONFIG as an environment variable for future steps
           echo "CONFIG=$CONFIG" >> $GITHUB_ENV
-          
-          echo "CONFIG set to: $CONFIG"
-
+                    
       - name: Clone AnyKernel3 and Other Dependencies
         run: |
           echo "Cloning AnyKernel3 and other dependencies..."
