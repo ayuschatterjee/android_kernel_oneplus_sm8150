@@ -11,10 +11,10 @@ on:
         value: 'android_kernel_oneplus_sm8150'
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
   
 jobs:
   build-kernel-sultan-kernelsu-susfs:
