@@ -163,7 +163,7 @@ jobs:
          echo "Packaging kernel from: $(pwd)"
          ls -la AnyKernel3/
          cd AnyKernel3
-         zip -r ../${{ env.OUTPUT_ZIP_NAME }}.zip *
+         zip -r ../OP7_KSUN.zip *
          echo "Created kernel zip:"
          ls -l ../*.zip
          cd ..
