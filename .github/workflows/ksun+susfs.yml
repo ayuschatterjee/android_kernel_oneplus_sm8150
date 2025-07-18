@@ -21,6 +21,8 @@ jobs:
       CCACHE_HARDLINK: "true"      
       KERNEL_CMDLINE: "ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-androidkernel- CROSS_COMPILE_ARM32=arm-linux-gnueabi- LLVM=1 LLVM_IAS=1 O=out"
       CONFIG: "${{ inputs.repo }}"
+      KERNEL_DEFCONFIG: 'lineage_sm8150_defconfig'
+      
     steps:                      
           
       - name: Installing dependencies
@@ -154,7 +156,7 @@ jobs:
           export LD=ld.lld
           echo "Building the kernel..."
           
-          make $KERNEL_CMDLINE "$codename"_defconfig CC="ccache clang-14"
+          make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang-14"
           make $KERNEL_CMDLINE scripts CC="ccache clang-14"
           make $KERNEL_CMDLINE prepare CC="ccache clang-14"
           make $KERNEL_CMDLINE CC="ccache clang-14" LD="ld.lld" -j$(nproc --all)
