@@ -80,8 +80,8 @@ jobs:
           cd ./KernelSU-Next
           
           echo "Applying next SUSFS patches..."
-          cp ../../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./
-          patch -p1 --forward --fuzz=7 < 10_enable_susfs_for_ksu.patch || echo "Patch failed !"       
+          #cp ../../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./
+          #patch -p1 --forward --fuzz=7 < 10_enable_susfs_for_ksu.patch || echo "Patch failed !"       
           
           echo "Applying next SUSFS Fix patches..."
           #cp ../../kernel_patches/next/susfs_fix_patches/v1.5.9/fix_apk_sign.c.patch ./
