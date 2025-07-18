@@ -14,16 +14,24 @@ on:
 jobs:
   build-kernelsu-susfs:
     runs-on: ubuntu-latest
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_MAXSIZE: "2G"
+      CCACHE_HARDLINK: "true"      
+      KERNEL_CMDLINE: "ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-androidkernel- CROSS_COMPILE_ARM32=arm-linux-gnueabi- LLVM=1 LLVM_IAS=1 O=out"
+      CONFIG: "${{ inputs.repo }}"
     steps:                      
           
       - name: Installing dependencies
         run: |
-          sudo apt update
-          sudo apt install -y gcc-aarch64-linux-gnu
-          CONFIG="${{ inputs.repo }}"
-          # Set CONFIG as an environment variable for future steps
-          echo "CONFIG=$CONFIG" >> $GITHUB_ENV
-                    
+          sudo apt update -y
+          sudo apt install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi clang-14 llvm-14 lld-14 binutils-aarch64-linux-gnu binutils make python3 libssl-dev build-essential bc bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs     
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          
       - name: Clone AnyKernel3 and Other Dependencies
         run: |
           echo "Cloning AnyKernel3 and other dependencies..."
@@ -140,12 +148,20 @@ jobs:
         run: |
           echo "Changing to configuration directory: $CONFIG..."
           cd "$CONFIG"
-          
+          export DTC_EXT=dtc
+          export PATH=$(pwd)/aarch64/bin:/usr/lib/llvm-14/bin:$PATH
+          export ARCH=arm64
+          export LD=ld.lld
           echo "Building the kernel..."
           
-          make ${{ inputs.codename }}_defconfig -j$(nproc --all)
-          make -j$(nproc --all)
-
+          make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang-14"
+          make $KERNEL_CMDLINE scripts CC="ccache clang-14"
+          make $KERNEL_CMDLINE prepare CC="ccache clang-14"
+          make $KERNEL_CMDLINE CC="ccache clang-14" LD="ld.lld" -j$(nproc --all)
+          cp out/arch/arm64/boot/Image ../AnyKernel3
+          cd ..
+          ls -la AnyKernel3/ 
+          
       - name: Copy Images
         run: |
           echo "Changing to configuration directory: $CONFIG..."
