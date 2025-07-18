@@ -43,7 +43,7 @@ jobs:
 
       - name: Set CONFIG Environment Variable
         run: |
-          CONFIG="${{ inputs.repo }}"
+          CONFIG="${{ inputs.repo }}" || 'android_kernel_oneplus_sm8150'
           
           # Set CONFIG as an environment variable for future steps
           echo "CONFIG=$CONFIG" >> $GITHUB_ENV
@@ -69,7 +69,8 @@ jobs:
           #cd ..
           git clone https://github.com/TheWildJames/kernel_patches.git
           git clone https://github.com/LineageOS/android_kernel_oneplus_sm8150
-          
+          git clone https://github.com/LineageOS/${{ inputs.repo }}
+      
       - name: Add KernelSU-Next
         run: |
           echo "Changing to configuration directory: $CONFIG..."
