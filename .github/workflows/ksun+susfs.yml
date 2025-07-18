@@ -1,23 +1,18 @@
-name: Ksun+Susfs
-permissions:
-  contents: write  # Allow writing to repository contents (for pushing tags)
-  actions: write   # Allows triggering actions
-
+name: Build kernel (KSN) & WIFI (New)
 on:
-  workflow_call: # This allows this workflow to be called from another workflow
-    inputs:
-      codename:
+  workflow_dispatch:
+    codename:
         required: true
         type: string
-      repo:
+    repo:
         required: true
         type: string
-      android_version:
-        required: true
-        type: string
-      kernel_version:
-        required: true
-        type: string
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
   
 jobs:
   build-kernel-sultan-kernelsu-susfs:
@@ -67,8 +62,7 @@ jobs:
           #cd susfs4ksu
           #git checkout b5c3ada461a61c6ad033693b7a00494ead3a28fd
           #cd ..
-          git clone https://github.com/TheWildJames/kernel_patches.git
-          git clone https://github.com/LineageOS/android_kernel_oneplus_sm8150
+          git clone https://github.com/TheWildJames/kernel_patches.git          
           git clone https://github.com/LineageOS/${{ inputs.repo }}
       
       - name: Add KernelSU-Next
@@ -118,7 +112,8 @@ jobs:
           
           # Change to common directory and apply SUSFS patch
           cd ..
-          patch -p1 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
+          patch -p1 < 50_add_susfs_in_kernel-4.14.patch || true
+          
           cp ../kernel_patches/sultan/sys.c_fix.patch ./
           patch -p1 --fuzz=3 < sys.c_fix.patch
 
@@ -184,23 +179,13 @@ jobs:
           echo "CONFIG_TCP_CONG_WESTWOOD=n" >> ./arch/arm64/configs/${{ inputs.codename }}_defconfig
           echo "CONFIG_TCP_CONG_HTCP=n" >> ./arch/arm64/configs/${{ inputs.codename }}_defconfig
 
-      - name: Run sed and perl Commands
-        run: |
-          echo "Changing to configuration directory: $CONFIG..."
-          cd "$CONFIG"
-          
-          echo "Running sed commands..."
-          sed -i 's/CONFIG_LOCALVERSION="-Sultan"/CONFIG_LOCALVERSION="-Wild"/' ./arch/arm64/configs/${{ inputs.codename }}_defconfig
-
       - name: Build the Kernel
         run: |
           echo "Changing to configuration directory: $CONFIG..."
           cd "$CONFIG"
           
           echo "Building the kernel..."
-          if [ "${{ inputs.codename }}" == "zumapro" ]; then
-            export KCFLAGS="-march=armv8.6-a -O3 --param=min-pagesize=0"
-          fi
+          
           make ${{ inputs.codename }}_defconfig -j$(nproc --all)
           make -j$(nproc --all)
 
@@ -226,7 +211,7 @@ jobs:
           cd ./AnyKernel3
 
           # Zip the files in the AnyKernel3 directory with a new naming convention
-          ZIP_NAME="${{ inputs.codename }}_A15_Sultan_Next_SUSFS.zip"
+          ZIP_NAME="${{ inputs.codename }}_A15_KernelSU_Next_SUSFS.zip"
           echo "Creating zip file $ZIP_NAME..."
           zip -r "../$ZIP_NAME" ./*
           
