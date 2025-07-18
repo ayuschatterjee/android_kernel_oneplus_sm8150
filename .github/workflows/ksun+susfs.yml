@@ -99,7 +99,7 @@ jobs:
              cat "$rejfile"
              echo "---------------------------"
             done
-           else
+          else
             echo "✅ Patch applied: $PATCH_FILE"
 
           cp ../../kernel_patches/next/susfs_fix_patches/v1.5.9/fix_core_hook.c.patch ./
