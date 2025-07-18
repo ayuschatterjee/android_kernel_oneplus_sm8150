@@ -52,7 +52,7 @@ jobs:
           echo "Cloning AnyKernel3 and other dependencies..."
           
           ANYKERNEL_BRANCH="master"
-          SUSFS_BRANCH="4.14"
+          SUSFS_BRANCH="kernel-4.14"
 
           # Debug print the branches
           echo "Using branch for AnyKernel3: $ANYKERNEL_BRANCH"
