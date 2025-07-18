@@ -85,15 +85,7 @@ jobs:
           # Change to common directory and apply SUSFS patch
           cd ..
           patch -p1 < 50_add_susfs_in_kernel-4.14.patch || true
-               
-      - name: Apply KSUN Hooks
-        run: |
-          echo "Changing to configuration directory: $CONFIG..."
-          cd "$CONFIG"
-          # Apply additional patch
-          cp ../kernel_patches/next/syscall_hooks.patch ./
-          patch -p1 -F 3 < syscall_hooks.patch
-          
+                   
       - name: Apply Hide Stuff Patches
         run: |
           echo "Changing to configuration directory: $CONFIG..."
@@ -165,31 +157,26 @@ jobs:
           cp out/arch/arm64/boot/Image ../AnyKernel3
           cd ..
           ls -la AnyKernel3/ 
-          
-      - name: Copy Images
+       
+      - name: Package Kernel
         run: |
-          echo "Changing to configuration directory: $CONFIG..."
-          cd "$CONFIG"
+         echo "Packaging kernel from: $(pwd)"
+         ls -la AnyKernel3/
+         cd AnyKernel3
+         zip -r ../${{ env.OUTPUT_ZIP_NAME }}.zip *
+         echo "Created kernel zip:"
+         ls -l ../*.zip
+         cd ..
 
-          echo "Copying Image.lz4 and concatenating DTB files..."
-          cp ./out/arch/arm64/boot/Image.lz4 ../AnyKernel3/Image.lz4
-          if [ "${{ inputs.codename }}" == "sm8150" ]; then
-            cat ./out/google-devices/sm8150/dts/*.dtb > ../AnyKernel3/dtb
-          fi
-
-      - name: Create ZIP Files for Different Formats
-        run: |
-          echo "Navigating to AnyKernel3 directory..."
-          cd ./AnyKernel3
-
-          # Zip the files in the AnyKernel3 directory with a new naming convention
-          ZIP_NAME="${{ inputs.codename }}_A15_KernelSU_Next_SUSFS.zip"
-          echo "Creating zip file $ZIP_NAME..."
-          zip -r "../$ZIP_NAME" ./*
-          
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: kernel-${{ inputs.codename }}
-          path: |
-            *.zip
+        files: |
+          OP7_KSUN.zip                
+        body: |
+          Device: Oneplus 7/Oneplus 7Pro/Oneplus 7T/Oneplus 7TPro
+          Includes:
+          - Kernel Image
+          - qca_cld3 Wi-Fi Module (vermagic matched)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
