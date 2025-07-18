@@ -21,10 +21,9 @@ jobs:
       CCACHE_HARDLINK: "true"      
       KERNEL_CMDLINE: "ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-androidkernel- CROSS_COMPILE_ARM32=arm-linux-gnueabi- LLVM=1 LLVM_IAS=1 O=out"
       CONFIG: "${{ inputs.repo }}"
-      KERNEL_DEFCONFIG: 'lineage_sm8150_defconfig'
+      KERNEL_DEFCONFIG: "lineage_sm8150_defconfig"
       
-    steps:                      
-          
+    steps:                               
       - name: Installing dependencies
         run: |
           sudo apt update -y
@@ -35,7 +34,7 @@ jobs:
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       
       - name: Set up ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@v1.2
          
       - name: Clone AnyKernel3 and Other Dependencies
         run: |
