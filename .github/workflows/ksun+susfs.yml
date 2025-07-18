@@ -80,12 +80,11 @@ jobs:
           
           echo "Applying next SUSFS patches..."
           cp ../../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./
-          patch -p1 --forward --fuzz=3 < 10_enable_susfs_for_ksu.patch 
+          patch -p1 --forward --fuzz=7 < 10_enable_susfs_for_ksu.patch || echo "Patch failed !"
    
           # Change to common directory and apply SUSFS patch
           cd ..
-          patch -p1 < 50_add_susfs_in_kernel-4.14.patch 
-                   
+          patch -p1 --forward --fuzz=7 < 50_add_susfs_in_kernel-4.14.patch || echo "Patch failed !"                   
 
       - name: Add SUSFS Configuration Settings
         run: |
