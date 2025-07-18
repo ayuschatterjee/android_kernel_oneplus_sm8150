@@ -10,12 +10,6 @@ on:
         required: true
         type: string
         default: 'android_kernel_oneplus_sm8150'
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   
 jobs:
   build-kernelsu-susfs:
