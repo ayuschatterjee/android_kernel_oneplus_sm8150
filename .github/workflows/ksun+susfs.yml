@@ -169,9 +169,9 @@ jobs:
          cd ..
 
       - name: Upload to Release
-         uses: softprops/action-gh-release@v2
-         with:
+          uses: softprops/action-gh-release@v2
+          with:
            files: |
              OP7_KSUN.zip
-         env:
-           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          env:
+            GITHUB_TOKEN: ${{ secrets.GH_PAT }}
