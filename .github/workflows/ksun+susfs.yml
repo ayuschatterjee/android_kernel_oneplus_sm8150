@@ -80,8 +80,8 @@ jobs:
           cd ./KernelSU-Next
           
           echo "Applying next SUSFS patches..."
-          #cp ../../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./
-          #patch -p1 --forward --fuzz=7 < 10_enable_susfs_for_ksu.patch || echo "Patch failed !"       
+          cp ../../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./
+          patch -p1 --forward --fuzz=7 < 10_enable_susfs_for_ksu.patch || true     
           
           echo "Applying next SUSFS Fix patches..."
           #curl -sL https://raw.githubusercontent.com/ayuschatterjee/android_kernel_oneplus_sm8150/refs/heads/main/10_enable_susfs_for_ksu.patch | patch -p1 --forward --fuzz=7 
@@ -106,7 +106,7 @@ jobs:
           
           # Change to common directory and apply SUSFS patch
           cd ..
-          patch -p1 --forward --fuzz=7 < 50_add_susfs_in_kernel-4.14.patch || echo "Patch failed !"                
+          patch -p1 --forward --fuzz=7 < 50_add_susfs_in_kernel-4.14.patch || true        
 
           cp ../kernel_patches/sultan/sys.c_fix.patch ./
           patch -p1 --fuzz=7 < sys.c_fix.patch
