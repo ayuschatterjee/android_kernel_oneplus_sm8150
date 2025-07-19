@@ -81,7 +81,7 @@ jobs:
           
           echo "Applying next SUSFS patches..."
           cp ../../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./
-          patch -p1 --forward --fuzz=7 < 10_enable_susfs_for_ksu.patch || echo "Patch failed !"       
+          #patch -p1 --forward --fuzz=7 < 10_enable_susfs_for_ksu.patch || echo "Patch failed !"       
           
           echo "Applying next SUSFS Fix patches..."
           #curl -sL https://raw.githubusercontent.com/ayuschatterjee/android_kernel_oneplus_sm8150/refs/heads/main/10_enable_susfs_for_ksu.patch | patch -p1 --forward --fuzz=7 
