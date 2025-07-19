@@ -1433,9 +1433,9 @@ index 5d7f4770..428c737d 100644
 --- a/kernel/apk_sign.c
 +++ b/kernel/apk_sign.c
 @@ -314,7 +314,13 @@
-
+ 
  #endif
-
+ 
 -bool is_manager_apk(char *path)
 +bool ksu_is_manager_apk(char *path)
  {
