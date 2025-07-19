@@ -1426,9 +1426,8 @@ index 5d7f4770..428c737d 100644
 +
 +ifeq ($(shell grep -q "struct selinux_state " $(srctree)/security/selinux/include/security.h; echo $$?),0)
 +ccflags-y += -DKSU_COMPAT_HAS_SELINUX_STATE
-+endif
-+
 +ccflags-y += -DKSU_UMOUNT
++endif
 
 --- a/kernel/apk_sign.c
 +++ b/kernel/apk_sign.c
